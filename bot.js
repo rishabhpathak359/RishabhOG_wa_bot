@@ -5,17 +5,28 @@ const mime = require('mime-types');
 const fetch=require('node-fetch')
 const ytdl = require('ytdl-core');
 const instagramDl = require("@sasmeee/igdl");
-
- const mykey="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"
- const validUrlPattern = /^https?:\/\/.+/i;
-
+// myKey="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"
+myKey = "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"
+const validUrlPattern = /^https?:\/\/.+/i;
+let start=false;
 const client = new Client({
     authStrategy: new LocalAuth(), 
     puppeteer: {
      executablePath: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
     }
 });
+// const { Hercai } = require('hercai');
 
+// const herc = new Hercai();
+
+// /* Available Models */
+// /* "v2" , "beta" , "v3-beta" */
+// /* Default Model; "v2" */
+// herc.question({model:"v3-beta",content:"hi, how are you?"}).then(response => {
+// console.log(response.reply);
+// /* The module will reply based on the message! */
+
+// });
 client.on('qr', (qr) => {
     // Generate and display the QR code for authentication
     qrcode.generate(qr, { small: true });
@@ -47,7 +58,42 @@ async function fetchBufferData(url){
 
 client.on('message', async message => {
     console.log(message.body);
-    if (message.body === "/video") {
+    if(message.body=="/gpt"){
+              start=true;
+              client.sendMessage(message.from,"ChatGpt is activated now,you can start asking your questions!!🟢")
+    }
+    else if(message.body=="/close"){
+        start=false;
+        message.reply("ChatGpt is now closed!!🔴")
+    }
+    if(start){
+        try{
+        const url="https://hercai.onrender.com/v3-beta/hercai?question=" + message.body
+        const data=await fetchData(url);
+        message.reply(data.reply);
+        }catch(err){
+            console.log(err);
+            message.reply("An error occured while creating a resposne for your request ☹️.Please try again later")
+        }
+    } 
+    else if(message.body.startsWith("/generate") && !start){
+        try{
+        const url="https://hercai.onrender.com/lexica/text2image?prompt=" + message.body.slice(10)
+        const processingMessage=await message.reply("Generating your image,please wait...🔴")
+        const data=await fetchData(url);
+        console.log(data);
+        buffer=await MessageMedia.fromUrl(data.url,{unsafeMime:true});
+        console.log(buffer)
+        buffer.mimeType="image/jpeg"
+        await message.reply(buffer);
+        processingMessage.edit("Your image has been generated successfully!!🟢")
+
+        }catch(err){
+            console.log(err);
+            message.reply("An error occured while generating your image ☹️.Please try again later")
+        }
+    }
+    if (message.body === "/video" && !start) {
         // Replace with the actual path to your file
         const internalMediaPath = 'internal.jpeg';
         const fileMimeType = mime.lookup(internalMediaPath);
@@ -57,7 +103,8 @@ client.on('message', async message => {
         client.sendMessage(message.from,media,{sendMediaAsSticker:true});
 
         //Downloading media
-    } else if (message.hasMedia) {
+    } 
+    else if (message.hasMedia && !start) {
         const media = await message.downloadMedia();
         if (typeof media.data === 'string') {
             const mediaPath = `image.${media.mimetype.split('/')[1]}`;
@@ -77,7 +124,7 @@ client.on('message', async message => {
     }
 
     
-    else if (message.body === "/s") {
+    else if (message.body === "/s" && !start) {
         message.delete(true).then(() => {
             console.log("Message deleted for everyone.");
         }).catch(err => {
@@ -93,7 +140,7 @@ client.on('message', async message => {
 //  #################################  YOUTUBE-MP4-YTDL ########################################
 
 
-   else if (message.body.startsWith('https://www.youtube.com') || message.body.startsWith('https://youtu.be')) { 
+   else if (message.body.startsWith('https://www.youtube.com') || message.body.startsWith('https://youtu.be') && !start) { 
         try {
             const url = message.body;
             const videoId = ytdl.getURLVideoID(url);
@@ -122,7 +169,7 @@ client.on('message', async message => {
 
 //   ######################################  YOUTUBE-MP4 ##########################################
 
-    else if(message.body.startsWith(".mp4")) {
+    else if(message.body.startsWith(".mp4") && !start) {
         try {
             const s = message.body.split(' ');
             const finalpath = s[1].split("/")[3].split("?")[0];
@@ -154,7 +201,7 @@ client.on('message', async message => {
 //  #################################### YOUTUBE MP3 ########################################
 
 
-else if(message.body.startsWith(".mp3")){
+else if(message.body.startsWith(".mp3") && !start){
     try {
         const s = message.body.split(' ');
         const finalpath = s[1].split("/")[3].split("?")[0];
@@ -182,7 +229,7 @@ else if(message.body.startsWith(".mp3")){
   
 //  ################################################   INSTAGRAM  VIDEOFILE########################################
 
-else if (message.body.startsWith(".insta")) {
+else if (message.body.startsWith(".insta") && !start) {
     try {
         const url = message.body.split(" ")[1];
         if(!url.startsWith("https://www.instagram.com/") && !url.startsWith("https://instagram.com/")){
@@ -213,7 +260,7 @@ else if (message.body.startsWith(".insta")) {
 
 //########################        FOR INSTA  LINKS         ################################
 
-else if(message.body.startsWith(".link")){
+else if(message.body.startsWith(".link") && !start){
     try {
         const url = message?.body?.split(" ")[1];
         if(!url.startsWith("https://www.instagram.com/") && !url.startsWith("https://instagram.com/")){
