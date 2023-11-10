@@ -12,12 +12,19 @@ myKey = "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"
 const validUrlPattern = /^https?:\/\/.+/i;
 let start=false;
 const imageReferences={};
+// const client = new Client({
+//     authStrategy: new LocalAuth(), 
+//     puppeteer: {
+//      executablePath: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+//     }
+// }); 
+
 const client = new Client({
-    authStrategy: new LocalAuth(), 
+    authStrategy: new LocalAuth(),
     puppeteer: {
-     executablePath: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-    }
-}); 
+        executablePath: require('puppeteer').executablePath(),
+    },
+});
 fs.removeSync('./stickers')
 fs.mkdirpSync('./stickers')
 client.on('qr', (qr) => {
