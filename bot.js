@@ -7,21 +7,21 @@ const ytdl = require('ytdl-core');
 const {fetchBuffData} = require("./test")
 const { Sticker, createSticker, StickerTypes } = require('wa-sticker-formatter');
 const instagramDl = require("@sasmeee/igdl");
+const express=require('express')
+const app=express();
+
+app.get("/",(req,res)=>{
+    res.send("hello")
+})
+app.listen(3000,()=>{
+    console.log("server running on port no. 3000")
+})
 // myKey="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"
 myKey = "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"
 const validUrlPattern = /^https?:\/\/.+/i;
 let start=false;
 const imageReferences={};
-// const client = new Client({
-//     authStrategy: new LocalAuth(), 
-//     puppeteer: {
-//      executablePath: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-//     }
-// }); 
 const getChromePath = () => {
-    // Modify this function to dynamically determine the path of Chrome based on your deployment environment.
-    // For example, on Render, you might use an environment variable or a configuration file to store the path.
-    // Replace 'YOUR_CHROME_PATH' with the actual logic to determine the Chrome path.
     return process.env.CHROME_PATH || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 };
 
@@ -31,8 +31,6 @@ const client = new Client({
         executablePath: getChromePath(),
     },
 });
-fs.removeSync('./stickers')
-fs.mkdirpSync('./stickers')
 client.on('qr', (qr) => {
     // Generate and display the QR code for authentication
     qrcode.generate(qr, { small: true });
