@@ -1,32 +1,25 @@
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
-const fs = require('fs');
+const fs = require('fs-extra');
 const mime = require('mime-types');
 const fetch=require('node-fetch')
 const ytdl = require('ytdl-core');
+const {fetchBuffData} = require("./test")
+const { Sticker, createSticker, StickerTypes } = require('wa-sticker-formatter');
 const instagramDl = require("@sasmeee/igdl");
 // myKey="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"
 myKey = "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"
 const validUrlPattern = /^https?:\/\/.+/i;
 let start=false;
+const imageReferences={};
 const client = new Client({
     authStrategy: new LocalAuth(), 
     puppeteer: {
      executablePath: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
     }
-});
-// const { Hercai } = require('hercai');
-
-// const herc = new Hercai();
-
-// /* Available Models */
-// /* "v2" , "beta" , "v3-beta" */
-// /* Default Model; "v2" */
-// herc.question({model:"v3-beta",content:"hi, how are you?"}).then(response => {
-// console.log(response.reply);
-// /* The module will reply based on the message! */
-
-// });
+}); 
+fs.removeSync('./stickers')
+fs.mkdirpSync('./stickers')
 client.on('qr', (qr) => {
     // Generate and display the QR code for authentication
     qrcode.generate(qr, { small: true });
@@ -47,6 +40,7 @@ async function fetchData(url){
     return data;
 }
 async function fetchBufferData(url){
+    console.log(url)
     const response=await fetch(url);
     const videoBuffer = await response.buffer()
     if (!response.ok) {
@@ -54,9 +48,22 @@ async function fetchBufferData(url){
     }
     return videoBuffer;
 }
-
+async function getquotedmsg(message){
+  if (message.hasQuotedMsg)
+  {
+     const mssg=await  message.getQuotedMessage();
+     return mssg._data.type
+    }
+}
 
 client.on('message', async message => {
+    jid = message.from; // Store the sender's JID
+   mId = message.id._serialized; // Store the message ID
+
+if (message.hasMedia  ) {
+    // Store the image reference when an image is received
+    imageReferences[message.from] = message;
+  } 
     console.log(message.body);
     if(message.body=="/gpt"){
               start=true;
@@ -93,7 +100,7 @@ client.on('message', async message => {
             message.reply("An error occured while generating your image ☹️.Please try again later")
         }
     }
-    if (message.body === "/video" && !start) {
+   else if (message.body === "/video" && !start) {
         // Replace with the actual path to your file
         const internalMediaPath = 'internal.jpeg';
         const fileMimeType = mime.lookup(internalMediaPath);
@@ -104,33 +111,75 @@ client.on('message', async message => {
 
         //Downloading media
     } 
-    else if (message.hasMedia && !start) {
-        const media = await message.downloadMedia();
-        if (typeof media.data === 'string') {
-            const mediaPath = `image.${media.mimetype.split('/')[1]}`;
-            const data = Buffer.from(media.data, 'base64');
-            fs.writeFile(mediaPath, data, err => {
-                if (err) { 
-                    console.error("Failed to save file:", err);
-                } else {
-                    console.log("Received media file saved successfully.");
-                }
-            });
-            client.sendMessage(message.from,media,{sendMediaAsSticker:true});
-        } 
-        else {
-            console.error('Received media data is not a string:', media.data);
-        }
-    }
+    // else if (message.hasMedia && !start) {
+    //     const media = await message.downloadMedia();
+    //     if (typeof media.data === 'string') {
+    //         const mediaPath = `./stickers/image.${media.mimetype.split('/')[1]}`                                   //${media.mimetype.split('/')[1]}`;
+    //         const data = Buffer.from(media.data, 'base64');
+    //         fs.writeFile(mediaPath, data, err => {
+    //             if (err) { 
+    //                 console.error("Failed to save file:", err);
+    //             } else {
+    //                 console.log("Received media file saved successfully.");
+    //             }
+    //         });      
+   
+    //     } 
+    //     else {
+    //         console.error('Received media data is not a string:', media.data);
+    //     } 
+    // }
 
-    
-    else if (message.body === "/s" && !start) {
-        message.delete(true).then(() => {
-            console.log("Message deleted for everyone.");
-        }).catch(err => {
-            console.error("Failed to delete message:", err);
-        });
-    }
+
+    ///  ############################         OPEN VIEW ONCE MESSAGE ###########################################3333
+      else if(message.body==".img"  || message.body==".vid" && message.hasQuotedMsg && !start){
+        const referencedImage=imageReferences[message.from];
+       const typeofmedia=await  getquotedmsg(message)
+        if(referencedImage){
+            const media = await referencedImage.downloadMedia(); 
+            client.sendMessage(message.from, new MessageMedia(media.mimetype, media.data, media.mimetype), {
+                quotedMessageId:mId
+              }).then(() => {
+                console.log('Sticker sent successfully');
+              }).catch((error) => {
+                    message.reply("There was an error while completing your request☹️")
+              });
+        }
+      }
+
+//    #####################################  IMAGE TO STICKER ###################################################
+
+      else if (message.body === '.s' && message.hasQuotedMsg && !start) {
+        const typeofmedia=await getquotedmsg(message);
+        // Handle the '.s' command here
+        const referencedImage = imageReferences[message.from];
+        
+        if (referencedImage && typeofmedia=="image") {
+          const media = await referencedImage?.downloadMedia(); // Download the referenced image media
+          const sticker = new Sticker(media?.data, {
+            pack: 'My Pack', // The pack name
+            author: 'Me', // The author name
+            type: StickerTypes.FULL, // The sticker type
+            categories: ['🤩', '🎉'], // The sticker category
+            id: '12345', // The sticker id
+            quality: 50, // The quality of the output file
+            background: '#000000' // The sticker background color (only for full stickers)
+        })
+          await client.sendMessage(message.from, new MessageMedia(media?.mimetype, sticker.data.toString('base64'), media?.mimetype), {
+            sendMediaAsSticker: true, // Send the referenced image as a sticker
+            quotedMessageId:mId
+          }).then(() => {
+            console.log('Sticker sent successfully');
+          }).catch((error) => {
+            console.error('Error occurred while sending sticker:', error);
+          });
+        } else {
+          // If there is no referenced image, send a message to the user
+          client.sendMessage(message.from, 'No referenced image found. Please send an image and try again.');
+        }
+      }
+
+
     else if(message.body=="/e"){
         
        message.react("🥲");
@@ -148,7 +197,7 @@ client.on('message', async message => {
             const videoInfo = await ytdl.getInfo(videoId);
             // const format360p = videoInfo.formats.find(f => f.qualityLabel === '360p' && f.hasAudio && f.hasVideo);
             const videoReadableStream = ytdl(url)   
-            let videoBuffer = Buffer.alloc(0);
+            let videoBuffer = Buffer.alloc(0); 
             videoReadableStream.on('data', (chunk) => {
                 videoBuffer = Buffer.concat([videoBuffer, chunk]);
             }); 
@@ -264,7 +313,7 @@ else if(message.body.startsWith(".link") && !start){
     try {
         const url = message?.body?.split(" ")[1];
         if(!url.startsWith("https://www.instagram.com/") && !url.startsWith("https://instagram.com/")){
-            message.reply("Enter a valid instagram url!!")
+            message.reply("Enter a valid instagram url!!") 
             return;
         }
          const processingMessage=await message.reply("Processing your request.....🔴");
@@ -292,9 +341,16 @@ else if(message.body.startsWith(".link") && !start){
         await message.reply("An error occurred while processing the Instagram link.Try using the command .insta<space>Your_Link");
     }
 }
+
+else if(message.body.startsWith(".tts")){
+    const text=message.body.slice(4);
+    const media=await fetchBuffData(text);
+    client.sendMessage(message.from,new MessageMedia("audio/webp",media, `${text}.mp3`),{sendMediaAsDocument:true,quotedMessageId:mId})
+
+}
 });
 
 client.initialize();
 
-
+ 
  
