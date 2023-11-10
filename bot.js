@@ -18,11 +18,17 @@ const imageReferences={};
 //      executablePath: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
 //     }
 // }); 
+const getChromePath = () => {
+    // Modify this function to dynamically determine the path of Chrome based on your deployment environment.
+    // For example, on Render, you might use an environment variable or a configuration file to store the path.
+    // Replace 'YOUR_CHROME_PATH' with the actual logic to determine the Chrome path.
+    return process.env.CHROME_PATH || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+};
 
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
-        executablePath: require('puppeteer').executablePath(),
+        executablePath: getChromePath(),
     },
 });
 fs.removeSync('./stickers')
