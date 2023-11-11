@@ -37,9 +37,20 @@ const loadSession = () => {
 };
 
 // Function to save the session to a file
+// Function to save the session to a file
 const saveSession = (session) => {
-  fs.writeFileSync(SESSION_FILE_PATH, JSON.stringify(session));
-};
+    try {
+      if (session) {
+        fs.writeFileSync(SESSION_FILE_PATH, JSON.stringify(session));
+        console.log('Session saved successfully.');
+      } else {
+        console.error('Session is undefined, not saving.');
+      }
+    } catch (error) {
+      console.error('Error saving session:', error);
+    }
+  };
+  
 
 const client = new Client({
   authStrategy: new LocalAuth(),
