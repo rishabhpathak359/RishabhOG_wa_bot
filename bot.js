@@ -21,26 +21,47 @@ myKey = "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"
 const validUrlPattern = /^https?:\/\/.+/i;
 let start=false;
 const imageReferences={};
+const SESSION_FILE_PATH = './session.json';
 const getChromePath = () => {
     return process.env.CHROME_PATH || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 };
 
+
+// Function to load the session from a file
+const loadSession = () => {
+  if (fs.existsSync(SESSION_FILE_PATH)) {
+    const sessionData = require(SESSION_FILE_PATH);
+    return sessionData;
+  }
+  return null;
+};
+
+// Function to save the session to a file
+const saveSession = (session) => {
+  fs.writeFileSync(SESSION_FILE_PATH, JSON.stringify(session));
+};
+
 const client = new Client({
-    authStrategy: new LocalAuth(),
-    puppeteer: {
-        executablePath: getChromePath(),
-    },
+  authStrategy: new LocalAuth(),
+  puppeteer: {
+    executablePath: getChromePath(),
+},
+  session: loadSession(), // Load the session if available
 });
+
 client.on('qr', (qr) => {
-    // Generate and display the QR code for authentication
-    qrcode.generate(qr, { small: true });
-    console.log('QR received, please scan it with your phone.');
+  qrcode.generate(qr, { small: true });
+  console.log('QR received, please scan it with your phone.');
+});
+
+client.on('authenticated', (session) => {
+  // Save the session when authenticated
+  saveSession(session);
 });
 
 client.on('ready', () => {
-    console.log('Client is ready!');
+  console.log('Client is ready!');
 });
-
 
 async function fetchData(url){
     const response=await fetch(url);
