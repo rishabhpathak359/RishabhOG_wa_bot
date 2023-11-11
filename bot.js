@@ -189,19 +189,19 @@ else if(message.body.startsWith(".mp4") && !start){
             const waitingMessage=await message.reply("Processing your request please wait....🔴")
             const videoReadableStream = ytdl(url);
 
-            const videoFilePath = process.env.VIDEO_FILE_PATH || './videos/';
+            // const videoFilePath = process.env.VIDEO_FILE_PATH || './videos/';
             
-            const videoWriteStream = fs.createWriteStream(videoFilePath + 'video.mp4');
+            const videoWriteStream = fs.createWriteStream( 'video.mp4');
             
             // Pipe the video stream to the write stream
             videoReadableStream.pipe(videoWriteStream);
             
             // Wait for the write stream to finish
             videoWriteStream.on('finish', async () => {
-                const media = new MessageMedia('video/mp4', fs.readFileSync(videoFilePath + 'video.mp4').toString('base64'), null);
+                const media = new MessageMedia('video/mp4', fs.readFileSync('video.mp4').toString('base64'), null);
                 await message.reply(media, message.from);
                 await waitingMessage.edit('Your request has been completed!!🟢');
-                fs.unlinkSync(videoFilePath + 'video.mp4');
+                fs.unlinkSync( 'video.mp4');
             });
         } catch (error) {
             console.error('Error processing the video:', error);
@@ -226,18 +226,17 @@ else if(message.body.startsWith(".mp3") && !start){
 
         if (audioFormat) {
             const audioUrl = audioFormat.url;
-            const audioFilePath = process.env.AUDIO_FILE_PATH || './audio/';
 
             // Download audio stream
             const audioReadableStream = ytdl(url, { quality: 'highestaudio' });
-            const audioWriteStream = fs.createWriteStream(audioFilePath + 'audio.mp3');
+            const audioWriteStream = fs.createWriteStream(  'audio.mp3');
             audioReadableStream.pipe(audioWriteStream);
             audioWriteStream.on('finish', async () => {
 
-                const media = new MessageMedia('audio/mp3', fs.readFileSync(audioFilePath + 'audio.mp3').toString('base64'), videoTitle);
+                const media = new MessageMedia('audio/mp3', fs.readFileSync( 'audio.mp3').toString('base64'), videoTitle);
                 await message.reply(media, message.from,{sendMediaAsDocument:true});
                 await waitingMessage.edit('Your request has been completed!!🟢');
-                fs.unlinkSync(audioFilePath+'audio.mp3')
+                fs.unlinkSync('audio.mp3')
             });
         } else {
             await message.reply('No audio format found. Please try another video.');
