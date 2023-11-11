@@ -1,6 +1,7 @@
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
-const fetch=require('node-fetch')
+const fetch=require('node-fetch');
+process.env.YTDL_NO_UPDATE = true;
 const ytdl = require('ytdl-core');
 const {fetchBuffData} = require("./buffData")
 const fs=require('fs-extra')
