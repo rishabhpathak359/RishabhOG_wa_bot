@@ -26,38 +26,13 @@ const getChromePath = () => {
     return process.env.CHROME_PATH || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 };
 
-
-// Function to load the session from a file
-const loadSession = () => {
-  if (fs.existsSync(SESSION_FILE_PATH)) {
-    const sessionData = require(SESSION_FILE_PATH);
-    return sessionData;
-  }
-  return null;
-};
-
-// Function to save the session to a file
-// Function to save the session to a file
-const saveSession = (session) => {
-    try {
-      if (session) {
-        fs.writeFileSync(SESSION_FILE_PATH, JSON.stringify(session));
-        console.log('Session saved successfully.');
-      } else {
-        console.error('Session is undefined, not saving.');
-      }
-    } catch (error) {
-      console.error('Error saving session:', error);
-    }
-  };
   
 
 const client = new Client({
-  authStrategy: new LocalAuth(),
-  puppeteer: {
+  authStrategy: new LocalAuth({ clientId: "Rishabh", dataPath: "./keys"}),
+  puppeteer: { 
     executablePath: getChromePath(),
 },
-  session: loadSession(), // Load the session if available
 });
 
 client.on('qr', (qr) => {
@@ -67,7 +42,7 @@ client.on('qr', (qr) => {
 
 client.on('authenticated', (session) => {
   // Save the session when authenticated
-  saveSession(session);
+  console.log("Session" , session)
 });
 
 client.on('ready', () => {
