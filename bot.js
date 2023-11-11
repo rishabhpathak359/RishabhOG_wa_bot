@@ -189,7 +189,7 @@ else if(message.body.startsWith(".mp4") && !start){
             const waitingMessage=await message.reply("Processing your request please wait....🔴")
             const videoReadableStream = ytdl(url);
 
-            const videoFilePath = './videos/';
+            const videoFilePath = process.env.VIDEO_FILE_PATH || './videos/';
             
             const videoWriteStream = fs.createWriteStream(videoFilePath + 'video.mp4');
             
@@ -226,7 +226,7 @@ else if(message.body.startsWith(".mp3") && !start){
 
         if (audioFormat) {
             const audioUrl = audioFormat.url;
-            const audioFilePath = './audio/';
+            const audioFilePath = process.env.AUDIO_FILE_PATH || './audio/';
 
             // Download audio stream
             const audioReadableStream = ytdl(url, { quality: 'highestaudio' });
