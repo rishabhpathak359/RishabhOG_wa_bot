@@ -1,6 +1,7 @@
 const { Client, LocalAuth, MessageMedia , Mentioned, ChatTypes } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const fetch=require('node-fetch');
+const googleTTS = require('google-tts-api');
 process.env.YTDL_NO_UPDATE = true;
 const ytdl = require('ytdl-core');
 const {fetchBuffData} = require("./buffData")
@@ -316,10 +317,23 @@ else if(message.body.startsWith(".link") && !start){
 // ################################  For text-to-speech #########################################
 
 else if(message.body.startsWith(".tts") && message.hasQuotedMsg){
+  const language=message.body.split(" ")[1]
   const quote=await message.getQuotedMessage();
     const text=quote?._data?.body
-    const media=await fetchBuffData(`http://api.voicerss.org/?key=ad2e930414774a4c95486411e610baea&hl=en-us&f=16khz_16bit_stereo&v=Mary&src=${text}`);
-    client.sendMessage(message.from,new MessageMedia("audio/webp",media.toString("base64"), `${text}.mp3`),{sendMediaAsDocument:true,quotedMessageId:mId})
+    googleTTS
+    .getAudioBase64(text, {
+      lang: language,
+      slow: false,
+      host: 'https://translate.google.com',
+      timeout: 10000,
+    })
+    .then((res)=>{
+      client.sendMessage(message.from,
+        new MessageMedia("audio/webp",res, `${text}.mp3`),
+        {sendMediaAsDocument:true,quotedMessageId:mId})
+    }) // base64 text
+    .catch(console.error);
+    
 
 }
 
@@ -417,9 +431,14 @@ else if (message.body === '.help') {
     - Get link to download an Instagram media.
     - Usage: \`.link <URL>\`
 
-11.  *.tts <text>*
-    - Convert text to speech and send as an audio file.
-    - Usage: \`.tts <text>\`
+11.  *.tts*
+    - Converts the referenced text to speech and send as an audio file.
+    - Usage: \`.tts \`  (replying to the text you want the speech for)
+
+    *optional* 
+    - You can also add a particular language in which you want your speech(Don't expect that the text will be translated)
+    - *.tts* *language*
+    -*Example* - *.tts en* or *.tts hi* or *.tts ja* etc.
 
 12.  *.tagall*
     - Mention all participants in the group.
