@@ -68,6 +68,7 @@ async function getquotedmsg(message){
 client.on('message', async message => {
     jid = message.from; // Store the sender's JID
    mId = message.id._serialized; // Store the message ID
+   console.log(message.body);
    const gettingChat=await message.getChat();
    if(message.body==".ping"){
     message.reply("Pong!")
@@ -320,33 +321,28 @@ else if(message.body.startsWith(".tts") && message.hasQuotedMsg){
     client.sendMessage(message.from,new MessageMedia("audio/webp",media.toString("base64"), `${text}.mp3`),{sendMediaAsDocument:true,quotedMessageId:mId})
 
 }
-// else if (message.body === '.tagall' && message.hasQuotedMsg) {
-//   // Tag all participants in the group when the command is received
-//   const quote=await message.getQuotedMessage();
-//   console.log(quote._data.body)
-//   const chat = await message.getChat();
-//   console.log(chat)
-//     const contact = await message.getContact();
-//     console.log(contact)
-//     const messagedata=await chat.sendMessage(`${quote?._data?.body} @${contact.id.user}`, {
-//         mentions: [contact]
-//     });
-// }
 
-else if(message.body === '!everyone' && message.hasQuotedMsg && gettingChat.isGroup) {
+//   #######################################       Tag all participants with a message  #######################################33
+
+
+else if(message.body === '.everyone' && message.hasQuotedMsg && gettingChat.isGroup) {
   const quote=await message.getQuotedMessage();
   let text = "";
   let mentions = [];
+  let displaytext=`${quote?._data?.body} `
 
   for(let participant of gettingChat?.participants) {
       const contact = await client.getContactById(participant?.id?._serialized);
       
       mentions.push(contact);
-      text += `${quote?._data?.body} @${participant?.id?.user} `;
+      text += `@${participant?.id?.user} `;
   }
  
-  await gettingChat.sendMessage(text, { mentions });
+  await gettingChat.sendMessage(displaytext, { mentions });
 }
+
+// ###########################################  Tag all participants without any message ##############################################
+
 else if(message.body==".tagall" && gettingChat.isGroup){
   try{
   let text = "";
@@ -356,11 +352,11 @@ else if(message.body==".tagall" && gettingChat.isGroup){
       const contact = await client.getContactById(participant?.id?._serialized);
       
       mentions.push(contact);
-      text += `${quote?._data?.body} @${participant?.id?.user} `;
+      text += `@${participant?.id?.user} `;
   }
  
-  const sentmsg=await gettingChat.sendMessage(text, { mentions });
-  await sentmsg.delete(true)
+  const sentmsg=await message.reply(null,message.from, { mentions });
+  await sentmsg.edit("Done")
 }catch(err){
   console.log("Error",err);
   message.reply("There was an error mentioning all the participants")

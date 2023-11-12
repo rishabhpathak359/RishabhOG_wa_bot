@@ -46,13 +46,13 @@ async function getInstaVid(message,client){
             const thumbBuffer = await MessageMedia.fromUrl(data.download_link, { unsafeMime: true });
                  thumbBuffer.mimeType = 'video/mp4';
                  thumbBuffer.filename = `thumbnail${Math.floor(Math.random() * 8500)}`;
-                 await client.sendMessage(message.from, thumbBuffer);
+                 await client.sendMessage(message.from, thumbBuffer)
+                 .then(async ()=>{await processingMessage.edit("Your request has been completed successfully!!🟢")})
             
             } else {
                 await message.reply("Invalid or unsupported Instagram link.");
             }
         });
-        await processingMessage.edit("Your request has been completed successfully!!🟢");
        
     } catch (error) {
         console.error("Error processing Instagram link:", error);
