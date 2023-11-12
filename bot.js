@@ -46,6 +46,7 @@ client.on('authenticated', (session) => {
 
 client.on('ready', () => {
     client.sendMessage(me, "Bot On")
+    client.setStatus(`Welcome! try typing \`.help\` to get started with the usage of the bot`)
     console.log('Client is ready!');
 });
 
@@ -363,6 +364,82 @@ else if(message.body==".tagall" && gettingChat.isGroup){
 }
 
 }
+else if (message.body === '.help') {
+  const helpText = `
+👋 **Welcome to RishabhOG_BOT!**
+
+🤖 **Bot Introduction:**
+
+   - Bot Name: *RishabhOG_BOT*
+   - Created By: *Rishabh Pathak*
+
+🟢 **Status:**
+   - Online
+
+🚀 **Bot Commands:**
+1.  *.ping*
+   - Check if the bot is responsive.
+   - Usage: \`.ping\`
+
+2.  */gpt*
+   - Activate ChatGpt for answering questions.
+   - Usage: \`/gpt\`
+
+3.  */close*
+   - Deactivate ChatGpt.
+   - Usage: \`/close\`
+
+4.  */generate <prompt>*
+   - Generate an image based on the given prompt.
+   - Usage: \`/generate <prompt>\`
+
+5.  *.view*
+   - View the last referenced image.
+   - Usage: \`.view\`
+
+6.  *.s*
+   - Convert a referenced image to a sticker.
+   - Usage: \`.s\`
+
+7.  *.mp4 <YouTube URL>*
+   - Download and send a video from YouTube.
+   - Usage: \`.mp4 <YouTube URL>\`
+
+8.  *.mp3 <YouTube URL>*
+   - Download and send the audio from a YouTube video.
+   - Usage: \`.mp3 <YouTube URL>\`
+
+9.  *.insta <Instagram URL>*
+   - Download and send a video from Instagram.
+   - Usage: \`.insta <Instagram URL>\`
+
+10.  *.link <URL>*
+    - Get link to download an Instagram media.
+    - Usage: \`.link <URL>\`
+
+11.  *.tts <text>*
+    - Convert text to speech and send as an audio file.
+    - Usage: \`.tts <text>\`
+
+12.  *.tagall*
+    - Mention all participants in the group.
+    - Usage: \`.tagall\`
+
+13.  *.everyone*
+    - Mention all participants in the group with a message.
+    - Usage: \`.everyone\` (replying to a message that you want to display mentioning all the participants)
+
+🌟 **Feel free to explore and enjoy the bot's features!**
+
+🚀 **Future Updates:**
+   Stay tuned! More cool features will be added in future updates. Your bot experience is about to get even better! 🌟
+`;
+
+  // Send the enhanced help text to the user
+  await message.reply(helpText);
+}
+
+
 });
 
 
