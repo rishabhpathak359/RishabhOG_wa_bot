@@ -1,4 +1,6 @@
 const instagramDl = require("@sasmeee/igdl");
+const fetch=require('node-fetch')
+const fs=require('fs-extra')
 const { MessageMedia } = require('whatsapp-web.js');
 async function getInstaData(message,client,validUrlPattern){
     const url = message?.body?.split(" ")[1];
@@ -41,13 +43,19 @@ async function getInstaVid(message,client){
         }
          const processingMessage=await message.reply("Processing your request.....🔴");
          const dataList = await instagramDl(url);
+         
         dataList.map(async (data)=>{
             if (dataList) {
-            const thumbBuffer = await MessageMedia.fromUrl(data.download_link, { unsafeMime: true });
-                 thumbBuffer.mimeType = 'video/mp4';
-                 thumbBuffer.filename = `thumbnail${Math.floor(Math.random() * 8500)}`;
-                 await client.sendMessage(message.from, thumbBuffer)
-                 .then(async ()=>{await processingMessage.edit("Your request has been completed successfully!!🟢")})
+                const response=await fetch(data.download_link)
+                const getbuff=await response.buffer();
+                const fileName = `video${Math.floor(Math.random() * 8500)}.mp4`;
+                fs.writeFileSync(fileName, getbuff)
+                    const thumbBuffer =  await MessageMedia.fromFilePath(fileName, { unsafeMime: true });
+                    thumbBuffer.mimeType = 'video/mp4';
+                    await message.reply(thumbBuffer,message.from);
+
+                    // Delete the local file
+                    fs.unlinkSync(fileName);
             
             } else {
                 await message.reply("Invalid or unsupported Instagram link.");
