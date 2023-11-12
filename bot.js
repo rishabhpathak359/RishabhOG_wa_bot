@@ -1,4 +1,4 @@
-const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
+const { Client, LocalAuth, MessageMedia , Mentioned, ChatTypes } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const fetch=require('node-fetch');
 process.env.YTDL_NO_UPDATE = true;
@@ -68,7 +68,7 @@ async function getquotedmsg(message){
 client.on('message', async message => {
     jid = message.from; // Store the sender's JID
    mId = message.id._serialized; // Store the message ID
-   console.log(message.body);
+   const gettingChat=await message.getChat();
    if(message.body==".ping"){
     message.reply("Pong!")
    }
@@ -80,12 +80,12 @@ client.on('message', async message => {
 
     else if(message.body=="/gpt"){
               start=true;
-              client.sendMessage(message.from,"ChatGpt is activated now,you can start asking your questions!!🟢")
+              client.sendMessage(message.from,"AIChat is activated now,you can start asking your questions!!🟢")
     }
 
     else if(message.body=="/close"){
         start=false;
-        message.reply("ChatGpt is now closed!!🔴")
+        message.reply("AIChat is now closed!!🔴")
     }
 
     else if(start){
@@ -313,13 +313,62 @@ else if(message.body.startsWith(".link") && !start){
 
 // ################################  For text-to-speech #########################################
 
-else if(message.body.startsWith(".tts")){
-    const text=message.body.slice(4);
+else if(message.body.startsWith(".tts") && message.hasQuotedMsg){
+  const quote=await message.getQuotedMessage();
+    const text=quote?._data?.body
     const media=await fetchBuffData(`http://api.voicerss.org/?key=ad2e930414774a4c95486411e610baea&hl=en-us&f=16khz_16bit_stereo&v=Mary&src=${text}`);
     client.sendMessage(message.from,new MessageMedia("audio/webp",media.toString("base64"), `${text}.mp3`),{sendMediaAsDocument:true,quotedMessageId:mId})
 
 }
+// else if (message.body === '.tagall' && message.hasQuotedMsg) {
+//   // Tag all participants in the group when the command is received
+//   const quote=await message.getQuotedMessage();
+//   console.log(quote._data.body)
+//   const chat = await message.getChat();
+//   console.log(chat)
+//     const contact = await message.getContact();
+//     console.log(contact)
+//     const messagedata=await chat.sendMessage(`${quote?._data?.body} @${contact.id.user}`, {
+//         mentions: [contact]
+//     });
+// }
+
+else if(message.body === '!everyone' && message.hasQuotedMsg && gettingChat.isGroup) {
+  const quote=await message.getQuotedMessage();
+  let text = "";
+  let mentions = [];
+
+  for(let participant of gettingChat?.participants) {
+      const contact = await client.getContactById(participant?.id?._serialized);
+      
+      mentions.push(contact);
+      text += `${quote?._data?.body} @${participant?.id?.user} `;
+  }
+ 
+  await gettingChat.sendMessage(text, { mentions });
+}
+else if(message.body==".tagall" && gettingChat.isGroup){
+  try{
+  let text = "";
+  let mentions = [];
+
+  for(let participant of gettingChat?.participants) {
+      const contact = await client.getContactById(participant?.id?._serialized);
+      
+      mentions.push(contact);
+      text += `${quote?._data?.body} @${participant?.id?.user} `;
+  }
+ 
+  const sentmsg=await gettingChat.sendMessage(text, { mentions });
+  await sentmsg.delete(true)
+}catch(err){
+  console.log("Error",err);
+  message.reply("There was an error mentioning all the participants")
+}
+
+}
 });
+
 
 client.initialize();
 
