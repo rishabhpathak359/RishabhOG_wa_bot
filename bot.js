@@ -187,28 +187,33 @@ client.on('message', async message => {
 
 else if(message.body.startsWith(".mp4") && !start){
     const url = message.body.split(' ')[1];
+    const videoId = ytdl.getURLVideoID(url);
     if (url.startsWith('https://www.youtube.com') || url.startsWith('https://youtu.be') && !start) { 
+      const processingMessage=await message.reply("Processing your request please wait....🔴");
+      const videoInfo = await ytdl.getInfo(url);
+      const videoTitle = videoInfo.videoDetails.title.replace(/[^a-zA-Z0-9]/g, '-'); 
         try {
-            const waitingMessage=await message.reply("Processing your request please wait....🔴")
+            const waitingMessage=await processingMessage.edit(`🟡Getting data from the server for ${videoTitle}`)
             const videoReadableStream = ytdl(url);
 
             // const videoFilePath = process.env.VIDEO_FILE_PATH || './videos/';
-            
-            const videoWriteStream = fs.createWriteStream( 'video.mp4');
+            const fileName = `${videoId}${Math.floor(Math.random() * 8500)}.mp4`;
+            const videoWriteStream = fs.createWriteStream(fileName);
             
             // Pipe the video stream to the write stream
             videoReadableStream.pipe(videoWriteStream);
             
             // Wait for the write stream to finish
             videoWriteStream.on('finish', async () => {
-                const media = new MessageMedia('video/mp4', fs.readFileSync('video.mp4').toString('base64'), null);
-                await message.reply(media, message.from);
+              const media =  MessageMedia.fromFilePath(fileName, { unsafeMime: true });
+              media.mimeType = 'video/mp4';
+              await message.reply(media,message.from);
                 await waitingMessage.edit('Your request has been completed!!🟢');
-                fs.unlinkSync( 'video.mp4');
+                fs.unlinkSync(fileName);
             });
         } catch (error) {
             console.error('Error processing the video:', error);
-            await message.reply('An error occurred while processing your video.');
+            await message.reply('An error occurred while processing your video.☹️');
         }
     }
 }
@@ -219,34 +224,28 @@ else if(message.body.startsWith(".mp3") && !start){
       const url = message.body.split(' ')[1];
     if (url.startsWith('https://www.youtube.com') || url.startsWith('https://youtu.be') && !start) { 
     try {
-        const videoId = ytdl.getURLVideoID(url);
         const waitingMessage = await message.reply("Processing your request please wait....🔴");
 
         // Download video info to get audio format
         const videoInfo = await ytdl.getInfo(url);
-        const videoTitle = videoInfo.videoDetails.title.replace(/[^a-zA-Z0-9]/g, ''); // Remove special characters from the title
-        const audioFormat = ytdl.chooseFormat(videoInfo.formats, { filter: 'audioonly' });
-
-        if (audioFormat) {
-            const audioUrl = audioFormat.url;
-
-            // Download audio stream
-            const audioReadableStream = ytdl(url, { quality: 'highestaudio' });
-            const audioWriteStream = fs.createWriteStream(  'audio.mp3');
-            audioReadableStream.pipe(audioWriteStream);
-            audioWriteStream.on('finish', async () => {
-
-                const media = new MessageMedia('audio/mp3', fs.readFileSync( 'audio.mp3').toString('base64'), videoTitle);
-                await message.reply(media, message.from,{sendMediaAsDocument:true});
-                await waitingMessage.edit('Your request has been completed!!🟢');
-                fs.unlinkSync('audio.mp3')
-            });
-        } else {
-            await message.reply('No audio format found. Please try another video.');
-        }
+        const videoTitle = videoInfo.videoDetails.title.replace(/[^a-zA-Z0-9]/g, '-'); // Remove special characters from the title
+        const editedWaitingMessage=await waitingMessage.edit(`🟡Getting data from the server for ${videoTitle}`);
+          // Download audio stream
+          const audioReadableStream = ytdl(url, { filter: 'audioonly',quality:`${'lowestaudio' ? `lowestaudio` : `highestaudio`}` }); // Use audioUrl directly
+          const fileName=`${videoTitle}.mp3`;
+          const audioWriteStream = fs.createWriteStream(fileName);
+          audioReadableStream.pipe(audioWriteStream);
+  
+          audioWriteStream.on('finish', async () => {
+            const media =  MessageMedia.fromFilePath(fileName, { unsafeMime: true });
+              media.mimeType = 'audio/mpeg';
+              await message.reply(media,message.from,{sendMediaAsDocument:true});
+              await editedWaitingMessage.edit('Your request has been completed!!🟢');
+            fs.unlinkSync(fileName);
+          });
     } catch (error) {
-        console.error('Error processing the video:', error);
-        await message.reply('An error occurred while processing your video.');
+        console.error('Error processing the audio:', error);
+        await message.reply('An error occurred while processing your audio.☹️');
     }
 }
 }
@@ -317,7 +316,7 @@ else if(message.body.startsWith(".link") && !start){
 // ################################  For text-to-speech #########################################
 
 else if(message.body.startsWith(".tts") && message.hasQuotedMsg){
-  
+
     tts(message,client);
 
 }

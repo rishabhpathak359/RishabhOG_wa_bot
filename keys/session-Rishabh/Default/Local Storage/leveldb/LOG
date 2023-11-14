@@ -1,3 +1,5 @@
-2023/11/14-12:31:51.664 38cc Reusing MANIFEST C:\Users\LENOVO\Desktop\Projects\whatsapp-boting\keys\session-Rishabh\Default\Local Storage\leveldb/MANIFEST-000001
-2023/11/14-12:31:51.665 38cc Recovering log #3
-2023/11/14-12:31:51.666 38cc Reusing old log C:\Users\LENOVO\Desktop\Projects\whatsapp-boting\keys\session-Rishabh\Default\Local Storage\leveldb/000003.log 
+2023/11/14-15:02:54.526 4f00 Reusing MANIFEST C:\Users\LENOVO\Desktop\Projects\whatsapp-boting\keys\session-Rishabh\Default\Local Storage\leveldb/MANIFEST-000001
+2023/11/14-15:02:54.529 4f00 Recovering log #4
+2023/11/14-15:02:54.530 4f00 Level-0 table #6: started
+2023/11/14-15:02:54.542 4f00 Level-0 table #6: 15446 bytes OK
+2023/11/14-15:02:54.545 4f00 Delete type=0 #4
