@@ -1,3 +1,16 @@
-2023/11/14-15:31:43.298 33ac Reusing MANIFEST C:\Users\LENOVO\Desktop\Projects\whatsapp-boting\keys\session-Rishabh\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
-2023/11/14-15:31:43.299 33ac Recovering log #143
-2023/11/14-15:31:43.305 33ac Reusing old log C:\Users\LENOVO\Desktop\Projects\whatsapp-boting\keys\session-Rishabh\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000143.log 
+2023/11/14-16:31:53.595 45e8 Reusing MANIFEST C:\Users\LENOVO\Desktop\Projects\whatsapp-boting\keys\session-Rishabh\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2023/11/14-16:31:53.596 45e8 Recovering log #174
+2023/11/14-16:31:53.649 45e8 Reusing old log C:\Users\LENOVO\Desktop\Projects\whatsapp-boting\keys\session-Rishabh\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000174.log 
+2023/11/14-16:32:29.733 c1c Level-0 table #181: started
+2023/11/14-16:32:29.778 c1c Level-0 table #181: 1870454 bytes OK
+2023/11/14-16:32:29.780 c1c Delete type=0 #174
+2023/11/14-16:32:30.013 c1c Compacting 1@1 + 3@2 files
+2023/11/14-16:32:30.165 c1c Generated table #182@1: 80185 keys, 2280817 bytes
+2023/11/14-16:32:30.196 c1c Generated table #183@1: 3904 keys, 2171581 bytes
+2023/11/14-16:32:30.286 c1c Generated table #184@1: 55015 keys, 1806177 bytes
+2023/11/14-16:32:30.286 c1c Compacted 1@1 + 3@2 files => 6258575 bytes
+2023/11/14-16:32:30.287 c1c compacted to: files[ 0 0 3 0 0 0 0 ]
+2023/11/14-16:32:30.288 c1c Delete type=2 #176
+2023/11/14-16:32:30.288 c1c Delete type=2 #177
+2023/11/14-16:32:30.288 c1c Delete type=2 #178
+2023/11/14-16:32:30.289 c1c Delete type=2 #181

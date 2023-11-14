@@ -186,25 +186,36 @@ client.on('message', async message => {
 //  #################################  YOUTUBE-MP4-YTDL ########################################
 
 else if (message.body.startsWith(".mp4") && !start) {
-  const url = message.body.split(' ')[1];
-  const videoId = ytdl.getURLVideoID(url);
+
+  const args = message.body.split(' ');
+    
+  // Check if the command has a valid YouTube URL
+  if (args.length !== 2 || !args[1].startsWith('https://www.youtube.com') && !args[1].startsWith('https://youtu.be')) {
+      // Throw an error if the URL is missing or invalid
+      await message.reply('Ara-ara please provide a valid YouTube URL after the .mp4 command.🫡');
+      return;
+  }
+
+  const url = args[1];
+
+  const videoId = ytdl?.getURLVideoID(url);
   
   if (url.startsWith('https://www.youtube.com') || url.startsWith('https://youtu.be') && !start) { 
       const processingMessage = await message.reply("Processing your request please wait....🔴");
 
       try {
-          const videoInfo = await ytdl.getInfo(url);
+          const videoInfo = await ytdl?.getInfo(url);
 
-          if (!videoInfo.formats.some(format => format.hasVideo)) {
+          if (!videoInfo?.formats?.some(format => format?.hasVideo)) {
               throw new Error('The video does not contain playable video formats.');
           }
 
-          const videoTitle = videoInfo.videoDetails.title.replace(/[^a-zA-Z0-9]/g, '-'); 
+          const videoTitle = videoInfo?.videoDetails?.title?.replace(/[^a-zA-Z0-9]/g, '-'); 
           const waitingMessage = await processingMessage.edit(`🟡Getting data from the server for ${videoTitle}`);
 
           // Generate a unique filename using uuid
           const fileName = `${videoId}_${Math.random()*8500}_${videoTitle}.mp4`;
-          const videoReadableStream = ytdl(url);
+          const videoReadableStream = ytdl(url ,{quality:`highest`});
           const videoWriteStream = fs.createWriteStream(fileName);
 
           // Pipe the video stream to the write stream
@@ -214,7 +225,7 @@ else if (message.body.startsWith(".mp4") && !start) {
           videoWriteStream.on('finish', async () => {
               const media = MessageMedia.fromFilePath(fileName, { unsafeMime: true });
               media.mimeType = 'video/mp4';
-              await message.reply(media, message.from);
+              await message.reply(media, message.from, {sendMediaAsDocument:true});
               await waitingMessage.edit('Your request has been completed!!🟢');
               fs.unlinkSync(fileName);
           });
@@ -229,19 +240,29 @@ else if (message.body.startsWith(".mp4") && !start) {
 
 //   ######################################  YTDL MP-3 ##########################################
 else if (message.body.startsWith(".mp3") && !start) {
-  const url = message.body.split(' ')[1];
-  if (url.startsWith('https://www.youtube.com') || url.startsWith('https://youtu.be') && !start) {
+ 
+  const args = message.body.split(' ');
+    
+  // Check if the command has a valid YouTube URL
+  if (args.length !== 2 || !args[1].startsWith('https://www.youtube.com') && !args[1].startsWith('https://youtu.be')) {
+      // Throw an error if the URL is missing or invalid
+      await message.reply('Ara-ara please provide a valid YouTube URL after the .mp4 command.🫡');
+      return;
+  }
+
+  const url = args[1];
+  if (url.startsWith('https://www.youtube.com') || url.startsWith('https://youtu.be')) {
       try {
           const waitingMessage = await message.reply("Processing your request please wait....🔴");
 
           // Download video info to get audio format
-          const videoInfo = await ytdl.getInfo(url);
+          const videoInfo = await ytdl?.getInfo(url);
 
-          if (!videoInfo.formats.some(format => format.hasAudio)) {
+          if (!videoInfo?.formats?.some(format => format?.hasAudio)) {
               throw new Error('The video does not contain audio.');
           }
 
-          const videoTitle = videoInfo.videoDetails.title.replace(/[^a-zA-Z0-9]/g, '-'); // Remove special characters from the title
+          const videoTitle = videoInfo?.videoDetails?.title?.replace(/[^a-zA-Z0-9]/g, '-'); // Remove special characters from the title
           const editedWaitingMessage = await waitingMessage.edit(`🟡Getting data from the server for ${videoTitle}`);
 
           // Download audio stream
