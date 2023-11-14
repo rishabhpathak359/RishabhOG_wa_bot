@@ -1,13 +1,13 @@
 const { Client, LocalAuth, MessageMedia , Mentioned, ChatTypes } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const fetch=require('node-fetch');
-const googleTTS = require('google-tts-api');
 process.env.YTDL_NO_UPDATE = true;
 const ytdl = require('ytdl-core');
 const {fetchBuffData} = require("./buffData")
 const fs=require('fs-extra')
 const express=require('express');
 const { getInstaData, getInstaVid } = require('./insta');
+const { tts } = require('./tts');
 const app=express();
 
 app.get("/",(req,res)=>{
@@ -317,23 +317,8 @@ else if(message.body.startsWith(".link") && !start){
 // ################################  For text-to-speech #########################################
 
 else if(message.body.startsWith(".tts") && message.hasQuotedMsg){
-  const language=message.body.split(" ")[1]
-  const quote=await message.getQuotedMessage();
-    const text=quote?._data?.body
-    googleTTS
-    .getAudioBase64(text, {
-      lang: language,
-      slow: false,
-      host: 'https://translate.google.com',
-      timeout: 10000,
-    })
-    .then((res)=>{
-      client.sendMessage(message.from,
-        new MessageMedia("audio/webp",res, `${text}.mp3`),
-        {sendMediaAsDocument:true,quotedMessageId:mId})
-    }) // base64 text
-    .catch(console.error);
-    
+  
+    tts(message,client);
 
 }
 

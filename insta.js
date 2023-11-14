@@ -50,10 +50,10 @@ async function getInstaVid(message,client){
                 const getbuff=await response.buffer();
                 const fileName = `video${Math.floor(Math.random() * 8500)}.mp4`;
                 fs.writeFileSync(fileName, getbuff)
-                    const thumbBuffer =  await MessageMedia.fromFilePath(fileName, { unsafeMime: true });
+                    const thumbBuffer =  MessageMedia.fromFilePath(fileName, { unsafeMime: true });
                     thumbBuffer.mimeType = 'video/mp4';
                     await message.reply(thumbBuffer,message.from);
-
+                  processingMessage.edit("Your request has been completed successfully🟢")
                     // Delete the local file
                     fs.unlinkSync(fileName);
             
